@@ -14,7 +14,7 @@ for index, mission in enumerate(mission_source_list):
     if mission == 'K2':
         indices.append(index + 1)                            # add the index of the spreadsheet to the list so they can be easily found
         
-#print(indices)                                              # once it tells me the indices, i can find the tic ids
+#print(indices)                                              # once it tells me the indices, i can find the tic ids (this comment is toggled on/off as needed)
 
 tic_id_list = data['tic_id']   
                             
