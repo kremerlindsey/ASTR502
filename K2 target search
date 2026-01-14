@@ -1,0 +1,28 @@
+# week of jan 12
+
+import lightkurve as lk
+import pandas as pd
+
+filename = '/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv'
+data = pd.read_csv(filename)
+
+mission_source_list = data['mission_source']                 # column in mega list that tells what mission found it
+
+indices = []
+
+for index, mission in enumerate(mission_source_list):
+    if mission == 'K2':
+        indices.append(index + 1)                            # add the index of the spreadsheet to the list so they can be easily found
+        
+#print(indices)                                              # once it tells me the indices, i can find the tic ids
+
+tic_id_list = data['tic_id']   
+                            
+K2_observations = []
+
+for index in indices:
+    target_observed = tic_id_list[index]                     # this will find both stars and planets, i'll have to sort them myself later
+    K2_observations.append(target_observed)
+    
+print(K2_observations)
+
