@@ -33,5 +33,48 @@ fig1, ax1 = plt.subplots()
 ax1.plot(frequency, power)
 ax1.set_xlabel("Frequency")
 ax1.set_ylabel("Power")
+
+#------------------------------------------------------------------#
+
+# UPDATE below #
+
+#------------------------------------------------------------------#
+
+# lomb scargle practice
+
+import lightkurve as lk
+from astropy.timeseries import LombScargle
+import matplotlib.pyplot as plt
+import numpy as np
+
+# downloading a light curve from the K2 search
+
+search = lk.search_lightcurve('TIC 374180079', mission = 'K2')
+print(search)
+
+lc_collection = search[:2].download_all(download_dir = '/Users/lindseykremer/Desktop/')
+lc_collection
+
+fig, ax = plt.subplots()
+
+lc_collection.plot(ax = ax, title = "Light Curve Collection: TIC 374180079")
+
+# now using lomb scargle from astropy
+
+lc = lc_collection.stitch()
+lc = lc.normalize()
+lc = lc.remove_nans()
+
+t = lc.time.value
+y = lc.flux.value
+y = y - np.mean(y)
+
+frequency, power = LombScargle(t, y).autopower(minimum_frequency = 1/20, maximum_frequency = 1/0.1)
+
+fig1, ax1 = plt.subplots()
+ax1.plot(frequency, power)
+ax1.set_xlabel("Frequency")
+ax1.set_ylabel("Power")
+ax1.set_title("Lomb-Scargle Periodogram")
 ax1.set_title("Lomb-Scargle Periodogram")
 
