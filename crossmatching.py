@@ -1,18 +1,20 @@
 from astropy.table import Table
 import pandas as pd
 
-kounkel = Table.read('https://cdsarc.cds.unistra.fr/ftp/J/AJ/164/137/table1.dat', readme='https://cdsarc.cds.unistra.fr/ftp/J/AJ/164/137/ReadMe', format='ascii.cds').to_pandas()
+### Kounkel ###
 
-mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')
+mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')          # read in mega target list from class
+mega_list['ticid'] = mega_list['tic_id'].str.replace('TIC', '', regex=False).astype('Int64')    # replace the letters in the mega target list's cells with empty space so they can be read as integers
+                                                                                                # the first in parentheses is what you want removed  
 
-mega_with_kounkel = mega_list.merge(kounkel[['TIC', 'Per']], left_on='TICID', right_on='TIC').drop_duplicates(subset='TICID')
+kounkel = Table.read('https://content.cld.iop.org/journals/1538-3881/164/4/137/revision1/ajac866dt1_mrt.txt', format = 'ascii.cds').to_pandas()
+                                                                                                # read in the source using its link    
+print('catalogue read in done')
+print(kounkel.columns)
+print(mega_list.columns)
 
-### from ChatGPT ###
- 
-print("Number of matched TIC IDs:", len(mega_with_kounkel))
+mega_with_kounkel = mega_list.merge(kounkel[['TIC', 'Period']], 
+                                    left_on='ticid', 
+                                    right_on='TIC').drop_duplicates(subset='tic_id')
 
-matched_tics = mega_with_kounkel['TICID'].values
-
-### end ###
-
-print(len(matched_tics))
+print("Kounkel =", len(mega_with_kounkel), "matches")
