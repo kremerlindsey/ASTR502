@@ -2,7 +2,7 @@ from astropy.table import Table
 import pandas as pd
 import numpy as np
 
-mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')            # read in mega target list from class
+mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')          # read in mega target list from class
 
 ### Kounkel ###
 
