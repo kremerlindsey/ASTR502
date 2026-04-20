@@ -2,7 +2,7 @@ from astropy.table import Table
 import pandas as pd
 import numpy as np
 
-mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')          # read in mega target list from class
+mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')            # read in mega target list from class
 
 ### Kounkel ###
 
@@ -75,26 +75,15 @@ print("Holcomb =", len(mega_with_holcomb), "matches")
 
 mega_list['ticid'] = mega_list['tic_id'].str.replace('TIC', '', regex=False).astype('Int64')    # replace the letters in the mega target list's cells with empty space so they can be read as integers
                                 
-mega_list = mega_list.drop_duplicates(subset = 'ticid')                                         # the first in parentheses is what you want removed  
+mega_list = mega_list.drop_duplicates(subset = 'ticid')                                                                # the first in parentheses is what you want removed  
 
-colman = np.loadtxt('/Users/lindseykremer/Downloads/fig12.dat 2',                               # read in the source using its link      
+colman = np.loadtxt('/Users/lindseykremer/Downloads/fig12.dat 2', 
                     usecols = (0,4))
-                                                            
+                                                            # read in the source using its link    
 TIC = colman[:, 0].astype(int)
 Prot = colman[:, 1]
 
 matches = mega_list['ticid'].isin(TIC)
 number = len(matches)
 print('Colman =', number)
-
-# print('catalogue read in done')
-# print(colman.columns)
-# print(mega_list.columns)
-
-# mega_with_colman = mega_list.merge(colman[['TIC', 'Prot']], 
-#                                     left_on='ticid', 
-#                                     right_on='TIC').drop_duplicates(subset='tic_id')
-
-# print("Colman =", len(mega_with_colman), "matches")
-
 
