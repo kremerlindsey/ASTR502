@@ -5,7 +5,7 @@ import numpy as np
 # read mega list
 mega_list = pd.read_csv('/Users/lindseykremer/Downloads/ASTR502_Mega_Target_List.csv')
 
-# clean IDs ONCE (don’t repeat this every section)
+# clean IDs to eliminate the words in front of the ID number
 mega_list['ticid'] = mega_list['tic_id'].str.replace('TIC', '', regex=False).astype('Int64')
 mega_list['gaiadr3'] = mega_list['gaia_dr3_id'].str.replace('Gaia DR3', '', regex=False).astype('Int64')
 
@@ -29,7 +29,7 @@ kounkel_out = kounkel_out.rename(columns={'Period': 'Prot'})
 
 all_results.append(kounkel_out)
 
-print("Kounkel =", len(kounkel_out))
+print("Kounkel =", len(kounkel_out))    # print the number of matches
 
 
 ### Fetherolf ###
@@ -111,10 +111,10 @@ all_results.append(colman_out)
 print("Colman =", len(colman_out))
 
 
-### COMBINE EVERYTHING ###
+### combine all data into one location ###
 final_df = pd.concat(all_results, ignore_index=True)
 
-# optional: remove duplicates if same TIC+Prot appears multiple times
+# remove duplicates if same TIC+Prot appears multiple times
 final_df = final_df.drop_duplicates()
 
 # save to CSV
