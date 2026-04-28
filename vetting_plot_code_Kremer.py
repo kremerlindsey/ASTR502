@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.timeseries import LombScargle
+from astropy.stats import SigmaClip
+from astropy.stats import sigma_clip
+from scipy.stats import median_abs_deviation
 
 #--------------------------------------------------------# ChatGPT helped me read in data from every file in a folder
 import os
@@ -29,7 +32,7 @@ def read_files_from_folder(folder_path):
     return data, names
 #--------------------------------------------------------#
     
-data, names = read_files_from_folder("/Users/lindseykremer/ssf light curves - ASTR502") # added by me -> 18 items in this folder (from Dropbox with Ian)
+data, names = read_files_from_folder("/Users/lindseykremer/all k2 ssf light curves - ASTR502") # added by me -> 18 items in this folder (from Dropbox with Ian)
 
 def _bin_series_fixed_width(x, y, width):
     if not np.isfinite(width) or width <= 0:
@@ -89,16 +92,33 @@ for i, column in enumerate(data):                                               
     # lomb scargle section for obtaining star period and power -> added by me
 
     time = data[i]["T"]
-    flux = data[i]["FRAW"]
-    normflux = flux - np.nanmedian(flux)
-    frequency, power = LombScargle(time, normflux, center_data = True, normalization = "psd").autopower(minimum_frequency = (1/20), maximum_frequency = 0.55)
-
-    # plt.plot(frequency, power)                            # plotting periodograms
-    # plt.title(f"Lomb Scargle Periodogram for {names[i]}") # commented out so that indices aren't messed up
-    # plt.xlabel("frequency")                               # but left here in case helpful later
-    # plt.ylabel("power")
-    # plt.show()
+    flux = data[i]["FCOR"]
+    normflux = flux / np.nanmedian(flux)
+    frequency, power = LombScargle(time, normflux, center_data = True).autopower(minimum_frequency = (1/40), maximum_frequency = 1/0.2)
         
+    ## subsection for long term detrending
+    
+    finite = np.isfinite(time) & np.isfinite(flux)           # start with a finite mask
+    t0 = time[finite]
+    f0 = flux[finite]
+    
+    sigclip = SigmaClip(sigma = 2, maxiters = None, cenfunc = 'median', stdfunc = 'mad_std') # could also use median
+    
+    clipped = sigclip(f0)                                    # returns a masked array telling you what got clipped
+    
+    good = ~clipped.mask                                     # is true where not clipped
+    
+    time_clean = t0[good]
+    flux_clean = f0[good]
+    p = np.polyfit(time_clean, flux_clean, deg = 3) # third order polynomial
+    
+    fit_flux = np.polyval(p, time_clean)
+    reduced_flux = flux_clean / fit_flux
+    time = time_clean
+    flux = reduced_flux
+    
+    ## end of subsection
+    
     max_power_index = np.argmax(power)                      # finding star period
     max_frequency = frequency[max_power_index]
     star_period = 1 / max_frequency
@@ -113,9 +133,14 @@ for i, column in enumerate(data):                                               
     ax_time = axes[0, 0]
     ax_phase = axes[0, 1]
     ax_two_phase = axes[1, 0]
-    ax_zoom = axes[1, 1]
+    #ax_zoom = axes[1, 1]
+
+    amp = np.nanstd(normflux)                               # added by me 
     
-    amp = np.nanstd(normflux)                               # added by me    
+    fig.suptitle(
+        f"light curve {name}, P={star_period:.2f}, 2xP={2*star_period:.2f},Φ={star_power:.3f}, A={amp * 100:.2f}%",
+        fontsize=14,
+    )
     
     def _get_flux_ylim(best_amp_val, flux_vals):
         if np.isfinite(best_amp_val) and best_amp_val > 0:
@@ -128,6 +153,8 @@ for i, column in enumerate(data):                                               
                 f_std = 0.1 * abs(f_med) if f_med else 1.0
             return (f_med - 5 * f_std, f_med + 5 * f_std)
         return None
+    
+    #### top left 
     
     ax_time.scatter(time, flux, s=2, color="0.7", alpha=0.4, edgecolor="none", linewidths=0)
     bin_width_days = 4.0 / 24.0
@@ -149,7 +176,7 @@ for i, column in enumerate(data):                                               
     ylims_time = _get_flux_ylim(amp, flux)
     ax_time.set_ylim(ylims_time)
     
-    ####
+    #### top right
     
     period = star_period
     ylims_phase = _get_flux_ylim(amp, flux)
@@ -205,7 +232,7 @@ for i, column in enumerate(data):                                               
     ax_phase.set_title(f"light curve {name} flux vs phase")
     ax_phase.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     
-    #####
+    ##### bottom left 
     
     period = 0.5*star_period
     ylims_phase = _get_flux_ylim(amp, flux)
@@ -263,42 +290,35 @@ for i, column in enumerate(data):                                               
     ax_two_phase.set_title(f"light curve {name} flux vs phase")
     ax_two_phase.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     
-    ####
+    #### LS periodogram on bottom right
     
-    ax_zoom.scatter(time, flux, s=2, color="0.7", alpha=1, edgecolor="none")
-    bin_width_days = 4.0 / 24.0
-    binned_time, binned_flux = _bin_series_fixed_width(time, flux, bin_width_days)
-    if binned_time.size:
-        ax_zoom.scatter(
-            binned_time,
-            binned_flux,
-            s=16,
-            color="k",
-            alpha=0.9,
-            edgecolor="none",
-            linewidths=0,
-        )
-    ax_zoom.set_xlabel("time [days]")
-    ax_zoom.set_ylabel("flux")
-    ax_zoom.set_title(f"light curve {name} flux vs time")
-    ax_zoom.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
-    ylims_time = _get_flux_ylim(amp, flux)
-    ax_zoom.set_ylim(ylims_time)
-    ax_zoom.set_xlim(time[0], time[0] + 1)
+    plt.plot(1/frequency, power)                            
+    plt.title(f"Lomb Scargle Periodogram for {names[i]}") 
+    plt.xlabel("period (days)")                               
+    plt.ylabel("power")
+    plt.show()
 
     x_end = np.nanmax(time[0] + 1)
     x_start = x_end - 2*star_period
-    ax_zoom.hlines(y_line, x_start, x_end, colors="cyan", linewidth=2)
+    #ax_zoom.hlines(y_line, x_start, x_end, colors="cyan", linewidth=2)     # leftover from old bottom right
 
     x_start = np.nanmax(time[0])
     x_end = x_start + star_period
-    ax_zoom.hlines(y_line, x_start, x_end, colors="crimson", linewidth=2)
+    #ax_zoom.hlines(y_line, x_start, x_end, colors="crimson", linewidth=2)  # leftover from old bottom right
     
-    
-    fig.suptitle(
-        f"light curve {name}, P={star_period:.2f}, 2xP={2*star_period:.2f},Φ={star_power:.3f}, A={amp * 100:.2f}%",
-        fontsize=12,
-    )
+    fig.savefig(f"light_curve_{name}.png")
     
     #plt.close()
+    
+savethis = { 
+    'Light Curve' : names,
+    'Star Period' : star_periods,
+    'Star Power' : star_powers
+    }
+
+df = pd.DataFrame(savethis)       # turn into a data frame
+
+file_name = 'Kremer_K2data.xlsx'  # choose a file name
+
+df.to_excel(file_name, sheet_name = 'Kremer_K2data', index = False)
 
