@@ -169,9 +169,9 @@ for i, column in enumerate(data):                                               
             edgecolor="none",
             linewidths=0,
         )
-    ax_time.set_xlabel("time [days]")
-    ax_time.set_ylabel("corrected flux")
-    ax_time.set_title(f"EPIC {name} corrected flux vs time")
+    ax_time.set_xlabel("time [days]", fontsize = 14)
+    ax_time.set_ylabel("corrected flux", fontsize = 14)
+    ax_time.set_title(f"EPIC {name} corrected flux vs time", fontsize = 14)
     ax_time.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     ylims_time = _get_flux_ylim(amp, flux)
     ax_time.set_ylim(ylims_time)
@@ -227,9 +227,9 @@ for i, column in enumerate(data):                                               
         )
         if ylims_phase:
             ax_phase.set_ylim(ylims_phase)
-    ax_phase.set_xlabel("phase")
-    ax_phase.set_ylabel("flux")
-    ax_phase.set_title(f"EPIC {name} flux vs phase")
+    ax_phase.set_xlabel("phase", fontsize = 14)
+    ax_phase.set_ylabel("flux", fontsize = 14)
+    ax_phase.set_title(f"EPIC {name} flux vs phase", fontsize = 14)
     ax_phase.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     
     ##### bottom left 
@@ -285,17 +285,17 @@ for i, column in enumerate(data):                                               
         )
         if ylims_phase:
             ax_two_phase.set_ylim(ylims_phase)
-    ax_two_phase.set_xlabel("phase")
-    ax_two_phase.set_ylabel("flux")
-    ax_two_phase.set_title(f"EPIC {name} 2 x (flux vs phase)")
+    ax_two_phase.set_xlabel("phase", fontsize = 14)
+    ax_two_phase.set_ylabel("flux", fontsize = 14)
+    ax_two_phase.set_title(f"EPIC {name} 2x(flux vs phase)", fontsize = 14)
     ax_two_phase.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     
     #### LS periodogram on bottom right
     
     plt.plot(1/frequency, power)                            
     plt.title(f"Lomb Scargle Periodogram for {names[i]}") 
-    plt.xlabel("period (days)")                               
-    plt.ylabel("power")
+    plt.xlabel("period (days)", fontsize = 14)                               
+    plt.ylabel("power", fontsize = 14)
     plt.show()
 
     x_end = np.nanmax(time[0] + 1)
