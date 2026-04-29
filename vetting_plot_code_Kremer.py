@@ -138,7 +138,7 @@ for i, column in enumerate(data):                                               
     amp = np.nanstd(normflux)                               # added by me 
     
     fig.suptitle(
-        f"light curve {name}, P={star_period:.2f}, 2xP={2*star_period:.2f},Φ={star_power:.3f}, A={amp * 100:.2f}%",
+        f"EPIC {name}, P={star_period:.2f}, 2xP={2*star_period:.2f},Φ={star_power:.3f}, A={amp * 100:.2f}%",
         fontsize=14,
     )
     
@@ -170,8 +170,8 @@ for i, column in enumerate(data):                                               
             linewidths=0,
         )
     ax_time.set_xlabel("time [days]")
-    ax_time.set_ylabel("flux")
-    ax_time.set_title(f"light curve {name} flux vs time")
+    ax_time.set_ylabel("corrected flux")
+    ax_time.set_title(f"EPIC {name} corrected flux vs time")
     ax_time.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     ylims_time = _get_flux_ylim(amp, flux)
     ax_time.set_ylim(ylims_time)
@@ -229,7 +229,7 @@ for i, column in enumerate(data):                                               
             ax_phase.set_ylim(ylims_phase)
     ax_phase.set_xlabel("phase")
     ax_phase.set_ylabel("flux")
-    ax_phase.set_title(f"light curve {name} flux vs phase")
+    ax_phase.set_title(f"EPIC {name} flux vs phase")
     ax_phase.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     
     ##### bottom left 
@@ -287,7 +287,7 @@ for i, column in enumerate(data):                                               
             ax_two_phase.set_ylim(ylims_phase)
     ax_two_phase.set_xlabel("phase")
     ax_two_phase.set_ylabel("flux")
-    ax_two_phase.set_title(f"light curve {name} flux vs phase")
+    ax_two_phase.set_title(f"EPIC {name} 2 x (flux vs phase)")
     ax_two_phase.grid(True, which="both", ls=":", lw=0.4, alpha=0.5)
     
     #### LS periodogram on bottom right
